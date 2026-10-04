@@ -1,0 +1,16 @@
+{
+  "description": "nocap: block unverified 'tests pass' / 'build ok' / 'fixed' claims at Stop.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${NOCAP_PYTHON:-python3} \"${CLAUDE_PLUGIN_ROOT}/hooks/nocap.py\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

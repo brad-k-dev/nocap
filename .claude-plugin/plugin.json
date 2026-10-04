@@ -1,0 +1,10 @@
+{
+  "name": "nocap",
+  "version": "0.2.0",
+  "description": "Your coding agent said \"done\". nocap checks the receipts: blocks unverified 'tests pass', 'build ok' and 'fixed' claims.",
+  "author": { "name": "Brad Kim", "url": "https://github.com/brad-k-dev" },
+  "license": "MIT",
+  "homepage": "https://github.com/brad-k-dev/nocap",
+  "repository": "https://github.com/brad-k-dev/nocap",
+  "keywords": ["hooks", "verification", "stop-hook", "laya", "jev", "coding-agent"]
+}

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="380" viewBox="0 0 760 380" role="img" aria-label="nocap blocks an unverified 'All tests pass' claim until the agent runs pytest">
+<style>text{font:14px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre;opacity:0}@keyframes k0{0%,2.5%{opacity:0}4.0%,96%{opacity:1}100%{opacity:0}}.l0{animation:k0 12.0s infinite}@keyframes k1{0%,10.0%{opacity:0}11.5%,96%{opacity:1}100%{opacity:0}}.l1{animation:k1 12.0s infinite}@keyframes k2{0%,13.3%{opacity:0}14.8%,96%{opacity:1}100%{opacity:0}}.l2{animation:k2 12.0s infinite}@keyframes k3{0%,15.0%{opacity:0}16.5%,96%{opacity:1}100%{opacity:0}}.l3{animation:k3 12.0s infinite}@keyframes k4{0%,23.3%{opacity:0}24.8%,96%{opacity:1}100%{opacity:0}}.l4{animation:k4 12.0s infinite}@keyframes k6{0%,33.3%{opacity:0}34.8%,96%{opacity:1}100%{opacity:0}}.l6{animation:k6 12.0s infinite}@keyframes k7{0%,35.8%{opacity:0}37.3%,96%{opacity:1}100%{opacity:0}}.l7{animation:k7 12.0s infinite}@keyframes k8{0%,35.8%{opacity:0}37.3%,96%{opacity:1}100%{opacity:0}}.l8{animation:k8 12.0s infinite}@keyframes k9{0%,35.8%{opacity:0}37.3%,96%{opacity:1}100%{opacity:0}}.l9{animation:k9 12.0s infinite}@keyframes k11{0%,50.0%{opacity:0}51.5%,96%{opacity:1}100%{opacity:0}}.l11{animation:k11 12.0s infinite}@keyframes k12{0%,56.7%{opacity:0}58.2%,96%{opacity:1}100%{opacity:0}}.l12{animation:k12 12.0s infinite}@keyframes k13{0%,65.0%{opacity:0}66.5%,96%{opacity:1}100%{opacity:0}}.l13{animation:k13 12.0s infinite}</style>
+<rect width="760" height="380" rx="10" fill="#0d1117"/>
+<circle cx="22" cy="20" r="6" fill="#ff5f56"/><circle cx="42" cy="20" r="6" fill="#ffbd2e"/><circle cx="62" cy="20" r="6" fill="#27c93f"/>
+<text x="380" y="25" fill="#8b949e" text-anchor="middle" style="opacity:1;font-size:12px">claude — nocap</text>
+<text class="l0" x="20" y="52" fill="#8b949e">&gt; fix add() in calc.py, then tell me</text>
+<text class="l1" x="20" y="74" fill="#e6edf3">● Update(calc.py)</text>
+<text class="l2" x="20" y="96" fill="#f85149">  ⎿  -    return a - b</text>
+<text class="l3" x="20" y="118" fill="#3fb950">  ⎿  +    return a + b</text>
+<text class="l4" x="20" y="140" fill="#e6edf3">● Fixed add() in calc.py. All tests pass.</text>
+<text class="l6" x="20" y="184" fill="#d29922">  Stop hook feedback:</text>
+<text class="l7" x="20" y="206" fill="#d29922">  nocap 🧢 — you said tests pass, but no matching command</text>
+<text class="l8" x="20" y="228" fill="#d29922">  ran in this session. Run the tests and show the result,</text>
+<text class="l9" x="20" y="250" fill="#d29922">  or retract the claim.</text>
+<text class="l11" x="20" y="294" fill="#e6edf3">● Bash(python3 -m pytest -q)</text>
+<text class="l12" x="20" y="316" fill="#3fb950">  ⎿  1 passed in 0.00s</text>
+<text class="l13" x="20" y="338" fill="#e6edf3">● Ran the tests: 1 passed. Now it's verified.</text>
+</svg>
