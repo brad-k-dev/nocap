@@ -48,11 +48,14 @@ checked every block by hand:
 Nearly every real catch has the same shape: the agent ran the tests, **then edited the code
 again**, rebuilt (or did nothing), and still reported "N tests pass".
 
-Run it on your own history — nothing leaves your machine:
+Run it on your own history — nothing leaves your machine. After installing, in Claude Code:
 
-```bash
-python3 replay.py            # replays ~/.claude/projects and ~/.codex/sessions
 ```
+/nocap:replay
+```
+
+or from a clone: `python3 replay.py --summary` (all of `~/.claude/projects` and
+`~/.codex/sessions`, ~15 s for 2,700 turns). It quotes what your agent said and what was missing.
 
 ### Install
 
@@ -143,11 +146,14 @@ nocap은 Claude Code와 Codex의 **Stop 훅**입니다. 에이전트가 *"테스
 진짜로 잡은 건은 거의 같은 모양입니다. 테스트를 돌린 **뒤에 코드를 또 고치고**, 빌드만 하거나
 아무것도 안 한 채 "테스트 N개 통과"라고 보고했습니다.
 
-내 기록으로 직접 돌려보세요. 외부로 아무것도 나가지 않습니다.
+내 기록으로 직접 돌려보세요. 외부로 아무것도 나가지 않습니다. 설치 후 Claude Code에서:
 
-```bash
-python3 replay.py            # ~/.claude/projects 와 ~/.codex/sessions 를 재생
 ```
+/nocap:replay
+```
+
+또는 clone한 저장소에서 `python3 replay.py --summary` (`~/.claude/projects` 와 `~/.codex/sessions`
+전체, 2,700턴에 약 15초). 에이전트가 한 말과 빠진 증거를 그대로 보여줍니다.
 
 ### 설치
 

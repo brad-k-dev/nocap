@@ -156,13 +156,13 @@ def detect_claims_regex(text):
     for pat in CLAIMS.values():
         text = pat.sub(lambda m: " " * len(m.group(0)) if m.start() and text[m.start() - 1] in "\"'`“‘" else m.group(0), text)
     text = QUOTED.sub(" ", text)
-    found = set()
+    found = {}  # claim -> the sentence that made it
     for sentence in re.split(r"(?<=[.!?。])\s+|\n+", text):
         if NEGATION.search(sentence) or NOT_THIS_SESSION.search(sentence):
             continue
         for name, pat in CLAIMS.items():
             if pat.search(sentence):
-                found.add(name)
+                found.setdefault(name, sentence.strip())
     return found
 
 
@@ -270,18 +270,21 @@ def read_transcript(path, upto=None):
         codex = '"session_meta"' in f.readline()
         f.seek(0)
         head = f.read() if upto is None else "".join(line for _, line in zip(range(upto), f))
-    used_tools = any(k in head for k in ('"tool_use"', '"CommandExecution"', '"FileChange"', '"function_call"', '"custom_tool_call"'))
+    used_tools = any(k in head for k in TOOL_MARKERS)
     if codex:
         events, final_text = _codex_events(path, upto)
     else:
-        until = None
-        if upto is not None:  # replay: subagent files also hold work done after this turn
-            stamps = re.findall(r'"timestamp":\s*"([^"]+)"', head)
-            until = stamps[-1] if stamps else None
-        events, final_text = _events(path, path[: -len(".jsonl")], 0, upto, until)
+        events, final_text = _events(path, path[: -len(".jsonl")], 0, upto)
+    return split(events) + ("\n".join(final_text), used_tools)
+
+
+TOOL_MARKERS = ('"tool_use"', '"CommandExecution"', '"FileChange"', '"function_call"', '"custom_tool_call"')
+
+
+def split(events):
+    """-> (commands since the last edit as (cmd, ok, results), edited at all?)"""
     last_edit = max((i for i, e in enumerate(events) if e[0] == "edit"), default=-1)
-    commands = [e[1:] for e in events[last_edit + 1:] if e[0] == "cmd"]
-    return commands, last_edit >= 0, "\n".join(final_text), used_tools
+    return [e[1:] for e in events[last_edit + 1:] if e[0] == "cmd"], last_edit >= 0
 
 
 CODEX_EXIT = re.compile(r"(?:Process exited with code|Exit code:) (\d+)")
@@ -300,7 +303,7 @@ def _codex_output(out):
     return out.split("Output:\n", 1)[-1]
 
 
-def _codex_events(path, upto=None):
+def _codex_events(path, upto=None, marks=None):
     """Codex rollout JSONL. Newer builds log item_completed (CommandExecution, FileChange);
     older ones only exec_command / write_stdin / apply_patch calls. Both are read, deduped by call id."""
     events, final_text, cwd = [], [], None
@@ -310,6 +313,8 @@ def _codex_events(path, upto=None):
         for n, line in enumerate(f):
             if upto is not None and n >= upto:
                 break
+            if marks is not None and n in marks:  # replay: state as of this turn's end
+                marks[n] = (len(events), list(final_text))
             try:
                 entry = json.loads(line)
             except ValueError:
@@ -408,7 +413,7 @@ def _codex_events(path, upto=None):
     return events, final_text
 
 
-def _events(path, session_dir, depth, upto=None, until=None):
+def _events(path, session_dir, depth, upto=None, until=None, marks=None):
     """-> (events, final_text). Subagent transcripts are spliced in where their Agent call returned."""
     pending = {}  # tool_use_id -> ("cmd" | "bg", command) | ("edit", None)
     background = {}  # tool_use_id -> command, settled by a later <task-notification>
@@ -420,11 +425,14 @@ def _events(path, session_dir, depth, upto=None, until=None):
         for n, line in enumerate(f):
             if upto is not None and n >= upto:  # replay: the session as it was at that turn
                 break
+            if marks is not None and n in marks:
+                marks[n] = (len(events), list(final_text))
             note = TASK_NOTE.search(line.replace("\\n", "\n"))
             if note and note.group(1) in async_agents:
                 sub = async_agents.pop(note.group(1))
-                if os.path.exists(sub):
-                    events += _events(sub, session_dir, depth + 1, until=until)[0]
+                stamp = re.search(r'"timestamp":\s*"([^"]+)"', line)
+                if os.path.exists(sub):  # a subagent log can keep growing later (SendMessage); cut it here
+                    events += _events(sub, session_dir, depth + 1, until=stamp and stamp.group(1))[0]
                 continue
             if note and note.group(1) in background:
                 use_id, out_file, status, code = note.groups()
@@ -468,7 +476,7 @@ def _events(path, session_dir, depth, upto=None, until=None):
                             # its work counts when it finishes; work still in flight isn't the parent's claim
                             async_agents[b.get("tool_use_id")] = sub
                         elif os.path.exists(sub):
-                            events += _events(sub, session_dir, depth + 1, until=until)[0]
+                            events += _events(sub, session_dir, depth + 1, until=entry.get("timestamp"))[0]
                     use = pending.pop(b.get("tool_use_id"), None)
                     if not use:
                         continue
@@ -502,9 +510,12 @@ def verdict(hook_input, upto=None):
     if hook_input.get("stop_hook_active"):
         return None
     commands, edited, final_text, used_tools = read_transcript(hook_input["transcript_path"], upto)
+    return judge(commands, edited, hook_input.get("last_assistant_message") or final_text, used_tools)
+
+
+def judge(commands, edited, text, used_tools):
     if not used_tools:  # a chat with no tool calls (advice, Q&A) has nothing to check against
         return None
-    text = hook_input.get("last_assistant_message") or final_text
     problems = []
     for claim in sorted(detect_claims(text)):
         why = missing_evidence(claim, commands, edited)

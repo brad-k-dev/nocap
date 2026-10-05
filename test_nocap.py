@@ -297,6 +297,16 @@ assert not blocked(user("x"), edit(), bash("npm test", ok=False, output="Tests  
                    say("23 unit tests pass. The E2E test failed on a network error, unrelated to this change."))
 assert blocked(user("x"), edit(), bash("npm test", ok=False, output="Tests  1 failed | 23 passed"), say("All tests pass."))
 
+# replay judges each turn exactly like the hook would have at that moment
+import replay  # noqa: E402
+lines = [user("a")] + edit() + [say("All tests pass."), user("b")] + bash("pytest", output="2 passed") + [say("All tests pass."), user("c")]
+with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as f:
+    f.write("\n".join(json.dumps(x) for x in lines))
+raw = open(f.name).read().splitlines()
+got = [(end, out is not None) for end, out, *_ in replay.judged_turns(f.name, raw)]
+assert got == [(end, nocap.verdict({"transcript_path": f.name}, upto=end) is not None) for end, _ in got], got
+assert [b for _, b in got] == [True, False, False], got
+
 # end-to-end through stdin: blocks with JSON, and never crashes on bad input
 with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as f:
     f.write("\n".join(json.dumps(x) for x in [user("x")] + edit() + [say("All tests pass.")]))
